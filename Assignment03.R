@@ -105,3 +105,73 @@ plot( performance(ROCRpredTest, "tpr", "fpr"), colorize=TRUE, print.cutoffs.at =
 auc = as.numeric(performance(ROCRpredTest, "auc")@y.values)
 auc
 
+## Lecture Sequence 2
+
+setwd("C:/C/Education/edX MIT 15.071 - The Analytics Edge/Unit 03 Data Files/")
+getwd()
+
+#Video 3
+
+framingham = read.csv("framingham.csv")
+str(framingham)
+summary(framingham)
+library(caTools)
+
+#Split into training and test frames
+set.seed(1000)		#same as video to match results in quizzes
+split = sample.split(framingham$TenYearCHD, SplitRatio = 0.65)
+train = subset(framingham, split == TRUE)		#apparently not the same as split
+test  = subset(framingham, split == FALSE)		#apparently not the same as !split
+
+framinghamLog = glm(TenYearCHD ~ ., data=train, family="binomial")		# '.' represents ALL other variables. Can't do if there are ID fields etc
+summary(framinghamLog)
+
+# Appears that male, age, prevalentStroke, totChol, sysBP, and glucose are significant
+# cigsPerDay and prevalentHyp are almost significant
+# All coefficients of significant variables are positive, and so appear to
+#   increase chances of 10 year heard disease
+#
+
+predictTest = predict(framinghamLog, type="response", newdata=test)
+table(test$TenYearCHD, predictTest > 0.5)
+
+#	Predicted->		FALSE TRUE
+# Actual 	0  		1069    6
+# Actual	1   	187   11
+
+recordsCorrect = 1069 + 11
+totalRecords = 1069 + 6 + 187 + 11
+accuracyRate = recordsCorrect / totalRecords
+accuracyRate	#0.8483896
+
+# baseline model would predict 0 for every case.
+baselineAccurayRate = (1069+6)/totalRecords
+baselineAccurayRate	#0.8444619
+
+#So, our model barely beats the baseline for accuracy
+# Perhaps need to vary threshold
+
+library(ROCR)
+ROCRpred = prediction(predictTest, test$TenYearCHD)
+auc = as.numeric(performance(ROCRpred, "auc")@y.values)
+auc #0.7421095
+#auc of 74% means model can predict low-risk vs high-risk patients fairly well.
+
+# Significant variables suggests interventions
+
+#qq 
+
+TP = 11
+FN = 187
+Sensitivity = TP / (TP + FN)
+Sensitivity
+
+TN = 1069
+FP = 6
+Specificity = TN / (TN + FP)
+Specificity
+
+
+# Video 4
+
+## Resume on video 4
