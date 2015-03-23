@@ -126,6 +126,8 @@ oddsFunctionLogistic = function(logisticModel, params){
 	return(odds)
 }
 
+oddsFunctionLogistic(ParoleLog1, params_43)
+
 probFunctionLogistic = function(logisticModel, params){
 	intercept = as.numeric(logisticModel$coefficients[1])
 	coeff = as.vector(logisticModel$coefficients[2:length(logisticModel$coefficients)])	
@@ -134,3 +136,53 @@ probFunctionLogistic = function(logisticModel, params){
 		( 1 + exp(-1 * logOdds) )
 	return(P)
 }
+
+probFunctionLogistic(ParoleLog1, params_43)
+
+#Problem 5
+pred = predict(ParoleLog1, type="response", newdata=test)
+max(pred)
+
+table(test$violator, pred > 0.5)
+
+#   FALSE TRUE		<-- Predicted
+# 0   167   12
+# 1    11   12
+# ^ 
+# actual
+
+TP = 12
+FN = 11
+sensitivity = TP / (TP + FN)
+sensitivity
+TN = 167
+FP = 12
+specificity = TN / (TN + FP)
+specificity
+
+recordsCorrect = 167 + 12
+totalRecords = 12 + 12 + 11 + 167
+accuracyRate = recordsCorrect / totalRecords
+accuracyRate	
+
+
+#Baseline comparison: 
+#  If we simply assume everyone is a non-violator:
+recordsCorrect = 167 + 12
+totalRecords = 12 + 12 + 11 + 167
+accuracyRate = recordsCorrect / totalRecords
+accuracyRate
+
+#5.4
+
+library(ROCR)
+ROCRpred = prediction(pred, test$violator)
+auc = as.numeric(performance(ROCRpred, "auc")@y.values)
+auc
+
+#6
+
+### PART 3 - PREDICTING LOAN REPAYMENT
+setwd("C:/C/Education/edX MIT 15.071 - The Analytics Edge/Unit 03 Data Files")
+getwd()
+
