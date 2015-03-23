@@ -77,5 +77,60 @@ specificity
 
 ### PART 2 - PREDICTING PAROLE VIOLATORS
 
+setwd("C:/C/Education/edX MIT 15.071 - The Analytics Edge/Unit 03 Data Files")
+getwd()
 
+parole = read.csv("parole.csv")
+summary(parole)
+nrow(parole)	#675
 
+nrow(subset(parole, violator == 1))		#78
+
+parole$state = as.factor(parole$state)
+parole$crime = as.factor(parole$crime)
+summary(parole)
+
+table(parole$crime)
+
+set.seed(144)
+library(caTools)
+split = sample.split(parole$violator, SplitRatio = 0.7)		#70% to training set
+train = subset(parole, split == TRUE)
+test = subset(parole, split == FALSE)
+
+#Problem 4
+
+ParoleLog1 = glm(violator ~ ., data = train, family = "binomial")
+summary(ParoleLog1)
+exp(1.61)
+
+params_43 = 	c(1, #male
+				 1,	#white
+				 50, #age
+				 0, #not KY
+				 0, #not LA
+				 0,	#nit VA				 
+				 3, #months served
+				 12, #max sentence
+				 0, # not multiple offences
+				 1, #yes larceny
+				 0,	# not not drugrelated
+				 0  # not driving related
+				 )
+
+oddsFunctionLogistic = function(logisticModel, params){	
+	intercept = as.numeric(logisticModel$coefficients[1])
+	coeff = as.vector(logisticModel$coefficients[2:length(logisticModel$coefficients)])	
+	logOdds = intercept + sum(coeff * params )
+	odds = exp(logOdds)
+	return(odds)
+}
+
+probFunctionLogistic = function(logisticModel, params){
+	intercept = as.numeric(logisticModel$coefficients[1])
+	coeff = as.vector(logisticModel$coefficients[2:length(logisticModel$coefficients)])	
+	logOdds = intercept + sum(coeff * params )
+	P = 1 / 
+		( 1 + exp(-1 * logOdds) )
+	return(P)
+}
