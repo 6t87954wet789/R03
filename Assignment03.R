@@ -186,3 +186,25 @@ auc
 setwd("C:/C/Education/edX MIT 15.071 - The Analytics Edge/Unit 03 Data Files")
 getwd()
 
+loans = read.csv("loans.csv")
+summary(loans)
+str(loans)
+
+require("mice") || install.packages("mice")
+library("mice")
+set.seed(144)
+vars.for.imputation = setdiff(names(loans), "not.fully.paid")
+imputed = complete(mice(loans[vars.for.imputation]))
+loans[vars.for.imputation] = imputed
+
+imputed = read.csv("loans_imputed.csv")		#Load from downloaded file in case OS-differences change outcome
+
+set.seed(144)
+library(caTools)
+split = sample.split(imputed$not.fully.paid, SplitRatio = 0.7)		#70% to training set
+train = subset(imputed, split == TRUE)
+test = subset(imputed, split == FALSE)
+
+nrow(train) / (nrow(test) + nrow(train))
+
+
