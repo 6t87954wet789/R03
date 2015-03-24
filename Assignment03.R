@@ -207,4 +207,42 @@ test = subset(imputed, split == FALSE)
 
 nrow(train) / (nrow(test) + nrow(train))
 
+LoadLog1 = glm(not.fully.paid ~ ., data = train, family="binomial")
+summary(LoadLog1)
 
+cFICO = -9.317e-03 
+dLogitA = cFICO * 700 
+dLogitB =  cFICO * 710 
+dLogitA - dLogitB		#Difference in log odds
+dA = exp(dLogitA)
+dB = exp(dLogitB)
+dA / dB 			#Ratio of odds
+
+pred = predict(LoadLog1, type="response", newdata=test)
+table(test$not.fully.paid, pred > 0.5)
+
+#   FALSE TRUE		<-- Predicted
+# 0  2400   13
+# 1   457    3
+# ^ 
+# actual
+
+TP = 3
+FN = 457
+sensitivity = TP / (TP + FN)
+sensitivity
+TN = 2400
+FP = 13
+specificity = TN / (TN + FP)
+specificity
+
+recordsCorrect = 2400 + 3
+totalRecords = 2400 + 3 + 13 + 457
+accuracyRate = recordsCorrect / totalRecords
+message("Accuracy Rate of Model is ", accuracyRate)
+
+#Baseline is just predicting FALSE every time.
+recordsCorrect = 2400 + 
+totalRecords = 2400 + 3 + 13 + 457
+accuracyRate = recordsCorrect / totalRecords
+message("Baseline Model accuracy rate is ", accuracyRate)
