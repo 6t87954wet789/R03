@@ -240,9 +240,77 @@ recordsCorrect = 2400 + 3
 totalRecords = 2400 + 3 + 13 + 457
 accuracyRate = recordsCorrect / totalRecords
 message("Accuracy Rate of Model is ", accuracyRate)
+accuracyRate
 
 #Baseline is just predicting FALSE every time.
-recordsCorrect = 2400 + 
+recordsCorrect = 2400 + 13
 totalRecords = 2400 + 3 + 13 + 457
 accuracyRate = recordsCorrect / totalRecords
 message("Baseline Model accuracy rate is ", accuracyRate)
+accuracyRate
+
+library(ROCR)
+ROCRpred = prediction(pred, test$not.fully.paid)
+auc = as.numeric(performance(ROCRpred, "auc")@y.values)
+auc
+
+#3.1
+
+LoanInterestLog1 = glm(not.fully.paid ~ int.rate, data=train, family="binomial")
+summary(LoanInterestLog1)
+predInterest = predict(LoanInterestLog1, type="response", newdata=test)
+max(predInterest)
+table(test$not.fully.paid, predInterest > 0.5)
+
+ROCRpredInterest = prediction(predInterest, test$not.fully.paid)
+aucInt = as.numeric(performance(ROCRpredInterest, "auc")@y.values)
+aucInt
+
+#4.1  - COMPUTING THE PROFITABILITY OF AN INVESTMENT
+
+payback = function(c, r, t){
+	return(
+		c * exp(r *t)
+		)
+}
+
+payback(10, 0.06, 3)
+
+#5.1
+
+test$profit = exp(test$int.rate * 3) - 1 	#Relative profit per dollar of original loan
+test$profit[test$not.fully.paid == 1] = -1 		#Complete loss of entire loan amount
+
+max(test$profit) * 10
+
+#6.1
+
+highInterest = subset(test, int.rate >= 0.15)
+mean(highInterest$profit)
+mean(highInterest$not.fully.paid)
+
+
+
+
+
+cutoff = sort(highInterest$predicted.risk, decreasing = FALSE)[100]
+
+# 6.2
+# Whoooooops didn't do all of 2.3; we were to have created a variable then which I missed.
+#   Will create here instead. Close enough.
+
+pred = predict(LoadLog1, type="response", newdata=test)
+length(pred)
+nrow(test)
+
+test$predicted.risk = pred
+
+# OK, back to the question:
+highInterest = subset(test, int.rate >= 0.15)
+cutoff = sort(highInterest$predicted.risk, decreasing = FALSE)[100]
+
+selectedLoans = subset(highInterest, predicted.risk <= cutoff)
+nrow(selectedLoans)
+sum(selectedLoans$profit)
+mean(selectedLoans$not.fully.paid)
+
